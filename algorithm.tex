@@ -1,0 +1,49 @@
+We represent a feasible integer-slot schedule by its completion-time vector.
+Within each slot, assign jobs in increasing job order to machines in increasing
+order. For a set of ready jobs,
+$\operatorname{first}_k$ returns its first $k$ members in increasing order
+of $M_j(\alpha)$, with ties broken by increasing job number.
+An isolated zero has a neighborhood containing no other zeros. In the
+return statement, $\operatorname*{arg\,min}$ selects the lexicographically
+first minimizing vector, comparing vectors at their first differing coordinate.
+Use a fixed deterministic polynomial-time LP algorithm to choose a rational
+optimal solution in the step below.
+
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\caption{Deterministic common-quantile scheduling}
+\label{alg:rounding}
+\KwIn{$\mathcal O$, the precedence relation, $(w_j)_{j\in\mathcal O}$, $m$}
+\KwOut{A feasible completion-time vector}
+\If{$m\ge n$}{\KwRet{$(a_j)_{j\in\mathcal O}$}\;}
+Compute an optimal LP solution $(x_{i,s})_{i\in\mathcal O,\,1\le s\le n}$\;
+$\mathcal C\gets\{0,1\}\cup
+  \bigl\{F_i(s):i\in\mathcal O,\ 1\le s\le n\bigr\}$\;
+$\mathcal C\gets\mathcal C\cup
+  \bigl\{\alpha\in(0,1):\text{$\alpha$ is an isolated zero of $M_i-M_k$ for
+  some distinct $i,k\in\mathcal O$}\bigr\}$\;
+$\mathcal S\gets\varnothing$\;
+\ForEach{consecutive $\alpha_-<\alpha_+$ in $\mathcal C$}{
+  $\alpha\gets(\alpha_-+\alpha_+)/2$\;
+  $\mathcal W\gets\mathcal O$\;
+  $s\gets1$\;
+  \While{$\mathcal W\ne\varnothing$}{
+    $\mathcal U\gets\{j\in\mathcal W:\{i\in\mathcal O:i\to j\}\cap\mathcal W=\varnothing\}$\;
+    $\mathcal V\gets\operatorname{first}_{\min\{m,|\mathcal U|\}}(\mathcal U)$\;
+    $(C_j)_{j\in\mathcal V}\gets(s)_{j\in\mathcal V}$\;
+    $\mathcal W\gets\mathcal W\setminus\mathcal V$\;
+    $s\gets s+1$\;
+  }
+  $\mathcal S\gets\mathcal S\cup\{(C_j)_{j\in\mathcal O}\}$\;
+}
+\KwRet{$\displaystyle\operatorname*{arg\,min}_{(C_j)_{j\in\mathcal O}\in\mathcal S}
+                  \sum_{j\in\mathcal O}w_j\cdot C_j$}\;
+\end{algorithm}
+
+The completed jobs form a predecessor-closed set, so checking incoming arcs
+suffices to identify ready jobs. The set $\mathcal U$ is nonempty whenever
+$\mathcal W$ is nonempty because the precedence graph is acyclic.
+If two jobs' quantile functions agree throughout an interval,
+increasing job number resolves their tie and no extra breakpoint is
+needed. Section~\ref{sec:foundations-derandomization} proves polynomial
+running time and bounds the cost returned by Algorithm~\ref{alg:rounding}.

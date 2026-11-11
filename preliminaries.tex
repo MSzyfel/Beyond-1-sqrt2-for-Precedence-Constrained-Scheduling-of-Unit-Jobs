@@ -1,0 +1,217 @@
+﻿\section{Preliminaries: a fractional reference schedule}
+\label{sec:foundations-lp}
+
+We begin with the time-indexed relaxation underlying Li's common-quantile
+approach \cite[Sections~2.1 and~3]{Li2017}. We spell out the relaxation and the
+interpolation used in this paper, since the latter also fixes the units and
+boundary conventions used in the proof.
+
+Let $\mathcal O=\{1,\ldots,n\}$ be the set of original jobs.
+Write $i\to j$ when the input graph contains an arc from $i$ to $j$, and
+call $i$ a predecessor of $j$ when $i\ne j$ and there is a directed path
+from $i$ to $j$.
+For a finite set of jobs, vertical bars denote its cardinality. For a
+measurable subset of the line or plane, they denote its length or area,
+respectively (Lebesgue measure). The \emph{depth}
+$a_j$ is the largest number of jobs on a directed path ending at $j$,
+including $j$. A set of jobs is \emph{predecessor closed} if it contains
+every predecessor of each of its members. A \emph{chain} is a sequence of
+jobs ordered by the precedence relation, and the \emph{height} of a set
+of jobs is the largest number of its jobs in a chain (zero for the empty
+set). Every schedule satisfies $C_j\ge a_j$: the jobs on such a
+path must execute one after another. The depths can be computed in polynomial
+time by repeatedly processing a job whose predecessors have been processed.
+For an integer $s\ge1$, the \emph{slot} $s$ is
+the interval $(s-1,s]$. If $m\ge n$, schedule each job $j$ in
+slot $a_j$. This is feasible and achieves all these lower bounds. Thus we
+may assume $1\le m<n$ below.
+
+\begin{lemma}[A finite integer horizon]
+There is an optimal schedule in which every job completes at an integer
+time between $1$ and $n$.
+\end{lemma}
+\begin{proof}
+Consider any feasible schedule and order the jobs assigned to each machine
+by their execution times. Add an arc between consecutive jobs in each
+machine order. Along each added or original arc, the second job starts no
+earlier than the first job's completion. Completion times therefore increase
+strictly along arcs, so the augmented graph is acyclic. Let $a'_j$ be the number
+of vertices on a longest augmented path ending at $j$. Execute $j$ in slot
+$a'_j$. The added arcs ensure that jobs
+assigned to the same machine do not overlap, and the original arcs ensure
+that precedence is respected. Every path has at most $n$ jobs, so
+$a'_j\in\{1,\ldots,n\}$. Along each augmented path ending at $j$, unit
+processing and the order constraints imply that the original completion
+time of $j$ is at least the length of the path. Therefore the new completion
+time $a'_j$ is no larger than the original one. Since weights are
+nonnegative, the transformed schedule costs no more. There are only finitely
+many integer-slot schedules within this horizon, so one of minimum cost
+among them is optimal even when compared with arbitrary feasible schedules.
+\end{proof}
+
+For each job $j$ and slot $s\in\{1,\ldots,n\}$, the variable
+$x_{j,s}$ is its fractional completion mass in slot $s$. We use the
+following linear program (LP). A sum with an upper limit below its lower
+limit is zero.
+\begin{align*}
+ \min\quad &\sum_{j\in\mathcal O}w_j\cdot\sum_{s=1}^n s\cdot x_{j,s},\\
+ \sum_{s=1}^n x_{j,s}&=1 &&\text{for every }j,\\
+ \sum_{j\in\mathcal O} x_{j,s}&\le m &&\text{for every }s,\\
+ \sum_{s'=1}^{s}x_{j,s'}&\le\sum_{s'=1}^{s-1}x_{i,s'}
+       &&\text{for every }i\to j\text{ and every }s,\\
+ x_{j,s}&\ge0.
+\end{align*}
+The precedence constraint says that mass completing $j$ by slot $s$ must
+be matched by mass completing each job with an arc to $j$ by slot $s-1$. For a
+feasible solution, put $C_j^{\mathrm{LP}}=\sum_{s=1}^n s\cdot x_{j,s}$.
+
+The depth-support observation follows the corresponding argument in
+Li's analysis \cite[Claim~3.1]{Li2017}.
+
+\begin{lemma}[Lower bound and depth support]
+\label{lem:lp-support}
+Every feasible integer-slot schedule completing by time $n$ gives a feasible
+LP solution with the same objective. Moreover, every feasible LP solution satisfies
+$x_{j,s}=0$ for $s<a_j$.
+\end{lemma}
+\begin{proof}
+Put unit mass in the completion slot of each job. Assignment, capacity,
+and precedence are then immediate, and the objective agrees with the
+schedule. Hence the LP optimum is a lower bound on the scheduling optimum.
+For the support claim, take a path $i_1\to\cdots\to i_{a_j}=j$. Repeatedly
+applying the cumulative precedence inequalities gives, for $s<a_j$,
+\[
+ \sum_{s'=1}^{s}x_{j,s'}
+ \le \sum_{s'=1}^{s-(a_j-1)}x_{i_1,s'}=0.
+\]
+Nonnegativity now gives the claim. The same repeated application shows how the constraints on
+arcs propagate along any path.
+\end{proof}
+
+The analysis below applies to any feasible LP solution. The algorithm uses
+an optimal solution, so its fractional objective is a lower bound on the
+optimal scheduling cost.
+
+\subsection{Virtual capacity padding}
+\label{sec:foundations-padding}
+
+It is useful to make the LP capacity exactly full in the analysis.
+Summing the assignment constraints gives
+\[
+ \sum_{s=1}^n\left(m-\sum_{j\in\mathcal O}x_{j,s}\right)=n\cdot(m-1).
+\]
+If $m>1$, introduce a set $\mathcal D$ of $n\cdot(m-1)$ independent
+\emph{virtual jobs}, each of weight zero and with no precedence arcs.
+Give each virtual job the fractional distribution
+\[
+ x_{i,s}=\frac{m-\sum_{j\in\mathcal O}x_{j,s}}{n\cdot(m-1)}
+ \qquad(i\in\mathcal D,\ 1\le s\le n).
+\]
+If $m=1$, let $\mathcal D$ be empty.
+
+\begin{lemma}[Exact fractional capacity]
+The virtual distributions are valid, and after padding every slot has
+exactly $m$ units of completion mass. The original-job distributions and the
+weighted LP objective are unchanged.
+\end{lemma}
+\begin{proof}
+By the capacity constraints, every numerator is nonnegative. For $m>1$,
+the displayed sum shows that each virtual job's masses sum to one and
+their total mass in each slot fills the unused capacity. For $m=1$, the
+nonnegative unused capacities sum to zero, so every slot was already full.
+Virtual jobs have zero weight and do not alter any original distribution.
+\end{proof}
+
+Let $\mathcal J=\mathcal O\cup\mathcal D$. Thus
+$|\mathcal J|=m\cdot n$ and
+\[
+ \sum_{i\in\mathcal J}x_{i,s}=m\qquad(1\le s\le n).
+\]
+The algorithm will schedule only the original jobs. The later
+virtual-pool transfer proposition explains why padded quantities may
+nevertheless be used to bound that schedule.
+
+\subsection{Continuous completion quantiles}
+\label{sec:foundations-interpolation}
+
+Spread mass $x_{i,s}$ uniformly over the slot $(s-1,s]$. Its \emph{cumulative distribution function} (CDF) is, for $t\in[s-1,s]$,
+\[
+ F_i(t)=\sum_{s'=1}^{s-1}x_{i,s'}+(t-s+1)\cdot x_{i,s}.
+\]
+Extend $F_i$ by zero for $t\le0$ and by one for $t\ge n$. Each $F_i$ is
+continuous and nondecreasing. Exact slot capacity gives the identity
+\begin{equation}
+ \sum_{i\in\mathcal J}F_i(t)=m\cdot t\qquad(0\le t\le n).
+ \label{eq:foundations-continuous-capacity}
+\end{equation}
+Indeed, all earlier slots contribute $m$ each and the current slot
+contributes $m\cdot(t-s+1)$.
+
+\begin{lemma}[Continuous precedence]
+For every arc $i\to j$ and every real $t$,
+\begin{equation}
+ F_j(t)\le F_i(t-1).
+ \label{eq:foundations-continuous-precedence}
+\end{equation}
+\end{lemma}
+\begin{proof}
+At integer times inside the horizon, this is the cumulative LP precedence
+constraint. At the remaining integer times it follows from the extensions
+and the constraint at the horizon. Between successive integers, both sides
+are affine, meaning linear plus a constant, so the difference is affine as
+well. It is nonpositive at both
+endpoints and therefore throughout the interval.
+\end{proof}
+
+For $0<\alpha<1$ define the \emph{generalized inverse}, or \emph{quantile},
+\[
+ M_i(\alpha):=\inf\{t\in[0,n]:F_i(t)\ge\alpha\}.
+\]
+At the endpoints, extend $M_i$ by its one-sided limits:
+\[
+ M_i(0)=\lim_{\alpha\downarrow0}M_i(\alpha),\qquad
+ M_i(1)=\lim_{\alpha\uparrow1}M_i(\alpha).
+\]
+These limits exist because $M_i$ is nondecreasing and bounded. The
+extension at $0$ is not obtained by substituting $\alpha=0$ into the
+infimum above. Intuitively, $M_i(\alpha)$ is the interpolated time by
+which an $\alpha$-fraction of job $i$ has completed. Although $F_i$ is
+continuous, $M_i$ can jump when $F_i$ has a flat interval.
+
+For a statement $A$, write $\mathbf1\{A\}$ for its indicator: one when $A$
+holds and zero otherwise.
+
+\begin{lemma}[Quantile separation and mean]
+For every $0<\alpha<1$, continuity gives $F_i(M_i(\alpha))=\alpha$.
+For each arc $i\to j$,
+\begin{equation}
+ M_i(\alpha)+1\le M_j(\alpha).
+ \label{eq:foundations-quantile-separation}
+\end{equation}
+Also $M_j(0)\ge a_j-1$, and
+\begin{equation}
+ \int_0^1M_j(\alpha)\,d\alpha
+   =\sum_{s=1}^n(s-\tfrac12)\cdot x_{j,s}
+   =C_j^{\mathrm{LP}}-\tfrac12.
+ \label{eq:foundations-quantile-mean}
+\end{equation}
+\end{lemma}
+\begin{proof}
+Continuity of $F_i$ and the definition of its generalized inverse give
+$F_i(M_i(\alpha))=\alpha$. Applying \eqref{eq:foundations-continuous-precedence} at
+$t=M_j(\alpha)$ gives $F_i(M_j(\alpha)-1)\ge\alpha$ and hence the
+separation inequality. Depth support puts all of $j$'s mass in slots
+$a_j$ and later, so $M_j(\alpha)\ge a_j-1$.
+
+For the mean, interchange the order of integration in
+$\int_0^1\int_0^n\mathbf1\{M_j(\alpha)>t\}\,dt\,d\alpha$. For fixed $t$,
+the measure of $\alpha$ with $M_j(\alpha)>t$ is $1-F_j(t)$, giving
+\[
+ \int_0^1 M_j(\alpha)\,d\alpha
+ =\int_0^n(1-F_j(t))\,dt.
+\]
+This is the mean of the interpolated distribution. The portion in slot $s$
+has mass $x_{j,s}$ and mean $s-\tfrac12$, which proves the identity. The
+half-unit correction will be kept throughout the analysis. The LP objective
+itself still uses integer completion slots.
+\end{proof}

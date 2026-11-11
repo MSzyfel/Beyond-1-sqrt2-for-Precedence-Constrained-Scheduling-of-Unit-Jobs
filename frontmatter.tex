@@ -1,0 +1,212 @@
+﻿\title{Beyond $1+\sqrt2$ for Precedence-Constrained Scheduling of Unit Jobs}
+\author{}
+\date{}
+\maketitle
+
+\begin{abstract}
+We study the problem of minimizing total weighted completion time when
+unit-time jobs with precedence constraints are scheduled on identical
+parallel machines. The number of machines is part of the input. We give
+a deterministic polynomial-time approximation algorithm with ratio
+$1+\sqrt2-0.0288468<2.385367$. The algorithm adapts Li's
+common-quantile rounding framework for a time-indexed linear program.
+Our analysis relates the loss in the scalar inequality underlying the
+$1+\sqrt2$ bound to progress forced by a band of jobs with nearby
+priorities. A geometric estimate charges both failures to enter this
+band and movement of the target quantile, and a signed-moment identity
+couples the resulting losses. We reduce the verification of the chosen
+parameters to finitely many exact quadratic inequalities. The algorithm
+schedules only the original jobs and is derandomized by enumerating
+polynomially many priority orders.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:foundations-introduction}
+
+Suppose a collection of tasks must be processed on several identical
+machines. Some tasks depend on others: for example, a computation may
+require data produced by an earlier computation. Each task takes one unit
+of time, a machine can process at most one task at a time, and a task can
+start only after all tasks on which it depends have finished. Finishing
+some tasks early is more valuable than finishing others early. We express
+this preference by giving each task a nonnegative weight and minimizing
+the sum of its weight times its completion time. Even with equal
+processing times, a decision to run one available task can delay other
+tasks and the work that depends on them. The difficulty is to balance
+these priorities while respecting both machine capacity and precedence.
+
+Formally, an instance consists of $n$ jobs numbered $1,\ldots,n$,
+$m$ identical machines,
+nonnegative rational weights $w_j$, and a directed acyclic graph whose
+arcs specify precedence constraints. An arc is a directed edge, and acyclic
+means that the graph has no directed cycle. Both $n$ and $m$ are positive integers.
+Every job starts at or after time zero and occupies one machine for
+one unit of time without interruption. If there is an arc from $i$ to
+$j$, job $j$ can start only after job $i$ completes. We seek a feasible
+schedule minimizing $\sum_{j=1}^{n} w_j\cdot C_j$, where $C_j$ is the completion time
+of job $j$. In standard scheduling notation, this is
+$P\mid\mathrm{prec},p_j=1\mid\sum_{j=1}^{n}w_j C_j$. The number of machines is
+part of the input, and we impose no restriction on the precedence graph.
+Here $P$ denotes identical parallel machines, $\mathrm{prec}$ denotes the
+precedence constraints, and $p_j$ is the processing time of job $j$.
+
+An \emph{approximation algorithm with ratio} $\rho$ always returns a feasible
+schedule of cost at most $\rho$ times the optimum. Our main result is the
+following. Its proof appears in Theorem~\ref{thm:final}.
+
+\begin{theorem}[Main result]
+\label{thm:main}
+There is a deterministic polynomial-time
+$(1+\sqrt2-0.0288468)$-approximation for this problem. The ratio is
+approximately $2.3853667624$.
+\end{theorem}
+
+\section{Related work}
+
+Hall, Schulz, Shmoys, and Wein gave a $(3-1/m)$-approximation for unit
+jobs on $m$ machines and a 2-approximation for one machine with arbitrary
+processing times \cite[Theorem~2.3 and page~530]{HSSW1997}.
+Munier, Queyranne, and Schulz gave a 4-approximation with arbitrary processing
+times even when precedence arcs impose nonnegative additional waiting times
+\cite{MQS1998}. For arbitrary processing times and every fixed
+$\varepsilon>0$, Li improved the ratio to $2+2\ln 2+\varepsilon$
+\cite[Theorem~1.1 of the full version]{Li2017}. J\"ager obtained the same
+ratio when jobs have release dates and precedence arcs can impose nonnegative
+waiting times \cite{Jaeger2018}. A release date is a time before which a job
+cannot start.
+
+Earlier scheduling algorithms used a preemptive or fractional schedule to
+guide the order of jobs \cite{PhillipsEtAl1998,HSSW1997}. One such priority
+is an \emph{$\alpha$-point}, the time by which a fraction $\alpha$ of a job
+has been processed in the guiding schedule. Randomized choices of these points
+have also been used in approximation algorithms
+\cite{ChekuriEtAl2001,SchulzSkutella1997}.
+
+For unit jobs, Li gave a polynomial-time $(1+\sqrt2)$-approximation
+with an arbitrary number of machines \cite[Theorem~1.2 and Section~3 of the full version]{Li2017}.
+We use the full version's numbering for Li's 2017 paper throughout. The journal
+version is \cite{Li2020}.
+The analysis uses a time-indexed linear programming relaxation, in which
+a job's completion time is represented fractionally, and a common random
+quantile to set the priorities of jobs. For every fixed $\varepsilon>0$, a subsequent result of Li gives a
+$(1+\sqrt2+\varepsilon)$-approximation in nearly-linear time,
+meaning linear in the number of jobs and input precedence arcs up to
+factors polylogarithmic in the input size
+\cite[Theorem~1.5]{Li2023}. These guarantees apply when the machine count
+is part of the input.
+
+Several related results concern different machine or job models. On one
+machine with arbitrary processing times, release dates, and precedence
+constraints, Sitters and Yang gave a $(2+\varepsilon)$-approximation for
+every fixed $\varepsilon>0$ \cite{SittersYang2018}. J\"ager and Warode gave
+a 2-approximation for one machine and a 3-approximation for identical
+parallel machines in the preemptive setting \cite{JaegerWarode2024}.
+Preemption allows a job to be interrupted and resumed later. Their
+parallel-machine result applies to arbitrary processing times and runs in
+strongly polynomial time.
+
+For \emph{related machines}, each machine has a speed and the time needed to
+process a job is its processing requirement divided by that speed.
+For arbitrary processing times and precedence constraints, Chudak and Shmoys
+gave an $O(\log m)$-approximation for related machines \cite{ChudakShmoys1999}.
+Li improved this ratio to $O(\log m/\log\log m)$
+\cite[Theorem~1.3 of the full version]{Li2017}. Chekuri, Motwani,
+Natarajan, and Stein used single-machine relaxations to design approximation
+algorithms for parallel machines and studied special precedence structures,
+including trees and series-parallel orders \cite{ChekuriEtAl2001}. On a single
+machine, Lawler gave a polynomial-time exact algorithm for series-parallel
+orders \cite{Lawler1978}. These orders can be built from individual jobs by
+repeatedly placing two disjoint orders in sequence or leaving them unordered
+with respect to each other.
+
+Hoogeveen, Schuurman, and Woeginger showed that there is no polynomial-time
+approximation scheme for unit jobs with precedence constraints and an
+input-dependent number of identical machines, unless $\mathrm{P}=\mathrm{NP}$,
+even when all weights are equal \cite{HoogeveenEtAl2001}. Such a scheme would
+provide a $(1+\varepsilon)$-approximation for every fixed $\varepsilon>0$.
+
+For every fixed number of machines and fixed $\varepsilon>0$, Garg, Kulkarni, and Li give a
+polynomial-time $(2+\varepsilon)$-approximation using a stronger
+relaxation \cite[Theorem~1.1]{GKL2019}. Its polynomial-time guarantee is
+for fixed $m$ and does not yield a polynomial-time algorithm uniformly
+over input-dependent $m$. Under the strengthened Unique Games hypothesis
+introduced by Bansal and Khot \cite{BK2009}, approximation within
+$2-\varepsilon$ is hard even for one machine \cite[Introduction]{GKL2019}.
+Roughly, this hypothesis concerns a regular bipartite graph whose edges
+impose permutation constraints on vertex labels. Its vertices are divided
+into two sides, every edge joins opposite sides, and every vertex has the
+same number of incident edges.
+Such a constraint requires one endpoint's label to be a prescribed permutation
+of the other endpoint's label.
+It asserts hardness of distinguishing instances with a labeling satisfying
+every constraint between two nearly complete vertex subsets from instances in which every
+labeling satisfies few constraints, while every subset of a specified small
+fraction of one side has almost all vertices on the other side as neighbors. The precise quantified
+statement is given in \cite[Hypothesis~1]{Svensson2011}. The scheduling hardness
+is conditional on this strengthened hypothesis.
+
+\section{Our contribution and proof overview}
+
+Our starting point is Li's linear-programming and common-quantile
+framework \cite[Section~3]{Li2017}. The algorithm in this paper uses a
+continuous interpolation of the fractional completion distributions and
+a machine-driven priority schedule. These adapt Li's framework with a
+different choice of rounding rule. For
+a chosen quantile, the priority of each job is the time at which its
+fractional completion distribution reaches that quantile. The same
+quantile is used for every job. The precedence constraints in the linear
+program make each predecessor's priority earlier than its successor's.
+At each time slot, the algorithm schedules the available jobs of earliest
+priority, up to the number of machines.
+
+The basic analysis separates the time until a particular job finishes
+into full and underfull slots after restricting the schedule to jobs with
+no later priority than the target. To count these jobs at a chosen quantile,
+compare each job's fractional completion by the target's fractional time
+with that quantile. As the quantile varies, this turns the expected prefix
+size into an area problem. A scalar area inequality controls this quantity
+and yields the $1+\sqrt2$ baseline. We prove a version of Li's area
+inequality and record additional identities for its excess
+\cite[Claim~3.3]{Li2017}. Li's analysis already exploits the fact that the workload and chain
+bounds cannot simultaneously attain their separate worst cases
+\cite[Section~3]{Li2017}. We develop a stronger coupling for this
+framework through priority-band progress, geometric excess, and a signed
+moment. Li identified an extremal scalar profile for the baseline bound
+\cite[Section~3]{Li2017}. In our analysis this profile places its job inside
+the priority band for almost every sufficiently large quantile, while the
+other equality case has zero pool weight. The proof makes this connection
+quantitative.
+Specifically, the additional analysis in this manuscript uses
+the following ingredients.
+
+\begin{itemize}
+\item A priority-band lemma relates idle slots to the number of shallow
+jobs (jobs with short prerequisite chains) whose priorities lie in a specified interval. Informally, scheduling
+these jobs forces progress on earlier-priority predecessors of the target.
+A weighted fractional pool makes this statement useful for the linear
+program. We construct the pool so that it automatically has the required size.
+\item A geometric estimate controls, together, the jobs that miss the
+priority band and the change in the target's quantile over the band. It
+charges these losses to the excess in the scalar area inequality.
+\item A signed-moment identity couples the charges across jobs instead of
+maximizing each contribution independently. This gives a sufficient
+parameter certificate for a strict improvement over $1+\sqrt2$. The final
+choice is checked using exact inequalities rather than a numerical search
+alone.
+\end{itemize}
+
+The analysis also uses virtual zero-weight jobs to fill unused fractional
+capacity. These jobs are a proof device and are never scheduled by the
+algorithm. We prove the transfer needed to apply the padded analysis to
+the original instance. Finally, we enumerate the intervals on which all
+original jobs have the same priority order. Choosing the least costly
+resulting schedule removes randomness in polynomial time.
+
+The fractional relaxation and quantile notation are developed in
+Section~\ref{sec:foundations-lp}. Section~\ref{sec:foundations-rounding}
+defines the schedule. The scalar inequality, priority-band estimate, and
+pool construction follow, after which the geometric and signed-moment
+bounds are assembled into a symbolic approximation certificate. The main
+text gives the deterministic implementation and resulting guarantee. The
+appendix verifies the parameter choice.
+
