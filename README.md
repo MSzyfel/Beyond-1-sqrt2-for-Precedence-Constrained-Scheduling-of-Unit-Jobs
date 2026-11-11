@@ -23,8 +23,8 @@ python audit_negative_well.py
 Both print their results and exit with an error if a check fails. The first
 checks quadratic maxima using their vertices and endpoints. The second uses
 Bernstein coefficients and interval subdivision. These optional checks do not
-replace review of the proof or establish literature priority. The accompanying
-PDF is a compiled reading copy.
+replace review of the proof or establish literature priority. The commands above
+generate `paper.pdf` locally as a reading copy.
 
 Supplementary finite checks are documented in
 [`experiments/README.md`](../experiments/README.md),
